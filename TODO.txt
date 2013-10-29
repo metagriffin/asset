@@ -1,0 +1,2 @@
+* make .load() optimize for no-wildcards specs by returning an Asset.
+  ==> Asset's must behave like AssetGroups though! (i.e. listable)
