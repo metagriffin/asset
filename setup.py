@@ -20,7 +20,7 @@ test_dependencies = [
 
 dependencies = [
   'distribute           >= 0.6.24',
-  'globre               >= 0.0.2',
+  'globre               >= 0.0.3',
   'six                  >= 1.4.1',
   ]
 
