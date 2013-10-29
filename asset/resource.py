@@ -30,10 +30,6 @@
 # mypkg.foo.bar$zig
 # mypkg.foo.bar$zig
 
-# list(asset.load('pkg:asset/glob.ext'))
-# asset.load('pkg:asset/glob.ext').read()
-
-
 import re, os, pkg_resources, functools, six
 import globre
 
@@ -214,18 +210,9 @@ def load(pattern, *args, **kw):
     pkgdir = pkgdir[:idx] if idx >= 0 else ''
 
   group = AssetGroup(pkgname, pkgdir, pattern, spec)
-
   if globre.iswild(pkgpat):
     return group
-
-  # todo: test if pkgpat actually exists...
-
   return Asset(group, pkgname, pkgpat)
-
-
-  #     yield Asset(self, pkg, res)
-
-  # return AssetGroup(pkgname, pkgdir, pattern, spec)
 
 #------------------------------------------------------------------------------
 # end of $Id$
