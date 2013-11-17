@@ -19,7 +19,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
-import pkg_resources
+import pkg_resources, inspect, six
 
 from .isstr import isstr
 
@@ -48,6 +48,37 @@ def symbol(spec):
       __import__(used)
       found = getattr(found, cur)
   return found
+
+#------------------------------------------------------------------------------
+def caller(ignore=None):
+  if ignore is None:
+    ignore = []
+  elif isinstance(ignore, basestring):
+    ignore = [ignore]
+  else:
+    ignore = ignore[:]
+  stack = inspect.stack()
+  record = None
+  one = False
+  try:
+    for record in stack:
+      if not record or not record[0]:
+        continue
+      mod = inspect.getmodule(record[0])
+      if not mod:
+        continue
+      mod = getattr(mod, '__package__', None)
+      if mod == 'asset':
+        continue
+      if not one:
+        one = True
+        continue
+      if mod not in ignore:
+        return mod
+    return None
+  finally:
+    del record
+    del stack
 
 #------------------------------------------------------------------------------
 # end of $Id$

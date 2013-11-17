@@ -3,7 +3,9 @@ Generalized Package Asset Loader
 ================================
 
 Loads resources and symbols from a python package, whether installed
-as a directory, an egg, or in source form.
+as a directory, an egg, or in source form. Also provides some other
+package-related helper methods, including ``asset.version()`` and
+``asset.caller()``.
 
 TL;DR
 =====
@@ -64,6 +66,25 @@ Query the installed version of a package:
 
   asset.version('no-such-package')
   # ==> None
+
+Find out what package is calling the current function:
+
+.. code-block:: python
+
+  # assuming your package is called "foo" which exports the "callfoo"
+  # function, and a packaged called "bar" imports foo, which is in
+  # turn used by a packaged "zig", then:
+
+  def callfoo():
+
+    asset.caller()
+    # ==> 'bar'
+
+    asset.caller(ignore='bar')
+    # ==> 'zig'
+
+    asset.caller(ignore=['bar', 'zig'])
+    # ==> None
 
 
 Details
