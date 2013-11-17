@@ -24,7 +24,7 @@ import unittest, pxml, xml.etree.ElementTree as ET
 import asset
 
 #------------------------------------------------------------------------------
-class TestAsset(unittest.TestCase, pxml.TestMixin):
+class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
 
   #----------------------------------------------------------------------------
   def test_version(self):

@@ -35,7 +35,7 @@ def read(*parts, **kw):
 test_dependencies = [
   'nose                 >= 1.3.0',
   'coverage             >= 3.6',
-  'pxml                 >= 0.2.7',
+  'pxml                 >= 0.2.10',
   ]
 
 dependencies = [
