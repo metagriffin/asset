@@ -21,7 +21,7 @@ name:
 
   import asset
 
-  # call the 'mypackage.foo.myfunc' function
+  # load the 'mypackage.foo.myfunc' function and call it with some parameter
   retval = asset.symbol('mypackage.foo.myfunc')(param='value')
 
 Load data files from a package:
@@ -37,8 +37,8 @@ Load data files from a package:
   stream = asset.stream('mypackage:templates/data.txt')
   data   = stream.read()
 
-Multiple files can be operated on at once by using glob-like
-wildcards:
+Multiple files can be operated on at once by using `globre
+<https://pypi.python.org/pypi/globre>`_ style wildcards:
 
 .. code-block:: python
 
@@ -60,7 +60,7 @@ wildcards:
 Details
 =======
 
-...
+TODO: add detailed docs...
 
 Note: because ``asset.load()`` does lazy-loading, it only throws a
 `NoSuchAsset` exception when you actually attempt to use the
@@ -75,8 +75,8 @@ Note that it returns itself, so you can do something like:
 
     return asset.load(my_spec).peek()
 
-    # this returns exactly the same thing as the following, but
-    # throws an exception early if there are no matching assets:
+    # this returns exactly the same thing as the following:
     #
     #   return asset.load(my_spec)
-
+    #
+    # but throws an exception early if there are no matching assets.
