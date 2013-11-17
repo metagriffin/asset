@@ -1,2 +1,24 @@
 * make .load() optimize for no-wildcards specs by returning an Asset.
   ==> Asset's must behave like AssetGroups though! (i.e. listable)
+
+* make import errors better, e.g. an
+    asset.symbol('asset.badmodule.BadClass')
+
+  fails with:
+    ImportError: No module named badmodule
+
+  or if badmodule exists, but not BadClass, then:
+    ImportError: No module named BadClass
+
+  it should:
+    ImportError: No module named asset.badmodule
+
+  for the former, and:
+    ImportError: No module or attribute named asset.badmodule.BadClass
+
+  for the latter.
+
+  ==> perhaps return an AssetError which is subclass of both ImportError
+      and AttributeError?
+      no. just ImportError
+      unless the asset-spec specifies an attribute...
