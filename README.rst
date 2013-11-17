@@ -28,8 +28,6 @@ Load data files from a package:
 
 .. code-block:: python
 
-  import asset
-
   # load the file 'mypackage/templates/data.txt' into string
   data = asset.string('mypackage:templates/data.txt')
 
@@ -42,8 +40,6 @@ Multiple files can be operated on at once by using `globre
 
 .. code-block:: python
 
-  import asset
-
   # concatenate all 'css' files into one string:
   css = asset.load('mypackage:static/style/**.css').read()
 
@@ -55,6 +51,19 @@ Multiple files can be operated on at once by using `globre
     cur = ET.SubElement(data, 'node', name=item.name)
     cur.text = item.read()
   data = ET.tostring(data)
+
+Query the installed version of a package:
+
+.. code-block:: python
+
+  asset.version('asset')
+  # ==> '0.0.5'
+
+  asset.version('python')
+  # ==> '2.7'
+
+  asset.version('no-such-package')
+  # ==> None
 
 
 Details
