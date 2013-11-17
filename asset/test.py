@@ -27,6 +27,10 @@ import asset
 class TestAsset(unittest.TestCase, pxml.TestMixin):
 
   #----------------------------------------------------------------------------
+  def test_version(self):
+    self.assertRegexpMatches(asset.version('pxml'), r'^\d+.\d+.\d+$')
+
+  #----------------------------------------------------------------------------
   def test_load_multi(self):
     self.assertEqual(len(asset.load('asset:test/data/file1.nl')), 1)
     self.assertEqual(

@@ -19,7 +19,16 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
+import pkg_resources
+
 from .isstr import isstr
+
+#------------------------------------------------------------------------------
+def version(package, default=None):
+  try:
+    return pkg_resources.get_distribution(package).version
+  except:
+    return default
 
 #------------------------------------------------------------------------------
 def symbol(spec):
