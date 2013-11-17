@@ -44,15 +44,10 @@ dependencies = [
   'six                  >= 1.4.1',
   ]
 
-entrypoints = {
-  # 'console_scripts': [
-  #   'TODO:PROJNAME      = TODO:PROJNAME.cli:main',
-  #   ],
-  }
+entrypoints = None
 
 classifiers = [
-  'Development Status :: 4 - Beta',
-  # 'Development Status :: 5 - Production/Stable',
+  'Development Status :: 5 - Production/Stable',
   'Intended Audience :: Developers',
   'Programming Language :: Python',
   'Operating System :: OS Independent',
