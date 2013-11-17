@@ -1,2 +1,2 @@
-include *.txt *.ini *.cfg *.rst *.json *.yaml
-recursive-include asset/test *
+include *.txt *.cfg *.rst
+graft asset/test
