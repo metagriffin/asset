@@ -71,9 +71,11 @@ Find out what package is calling the current function:
 
 .. code-block:: python
 
-  # assuming your package is called "foo" which exports the "callfoo"
-  # function, and a packaged called "bar" imports foo, which is in
-  # turn used by a packaged "zig", then:
+  # assuming the call stack is:
+  #   function "callfoo" in 
+  #   package "foo" is called from
+  #   package "bar", which is called from
+  #   package "zig"
 
   def callfoo():
 
