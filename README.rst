@@ -31,10 +31,10 @@ Load data files from a package:
 .. code-block:: python
 
   # load the file 'mypackage/templates/data.txt' into string
-  data = asset.string('mypackage:templates/data.txt')
+  data = asset.load('mypackage:templates/data.txt').read()
 
   # or as a file-like stream
-  stream = asset.stream('mypackage:templates/data.txt')
+  stream = asset.load('mypackage:templates/data.txt').stream()
   data   = stream.read()
 
 Multiple files can be operated on at once by using `globre
