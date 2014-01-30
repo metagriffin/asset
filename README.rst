@@ -98,6 +98,15 @@ TODO: add detailed docs...
   If the asset represents a file on the filesystem, is the absolute
   path to the specified file. Otherwise is ``None``.
 
+* ``AssetGroupStream.readline()``:
+
+  Returns the next line from the aggregate asset group stream, as if
+  the assets had been concatenate into a single asset.
+
+  **IMPORTANT**: if an asset ends with content that is not terminated
+  by an EOL token, it is returned as-is, i.e. it does NOT append the
+  first line from the next asset.
+
 Note: because ``asset.load()`` does lazy-loading, it only throws a
 `NoSuchAsset` exception when you actually attempt to use the
 AssetGroup! If you need an immediate error, use the `peek()` method.
