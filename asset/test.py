@@ -128,6 +128,32 @@ line-2</node>
     self.assertEqual(stream.read(3), '3\n')
     self.assertEqual(stream.read(3), '')
 
+  #----------------------------------------------------------------------------
+  def test_streamIteration(self):
+    stream = asset.load('asset:test/data/file**').stream()
+    self.assertEqual(stream.readline(), 'line-1\n')
+    self.assertEqual(stream.readline(), 'line-2')
+    self.assertEqual(stream.readline(), 'line-3\n')
+    self.assertEqual(stream.readline(), '')
+    stream = asset.load('asset:test/data/file**').stream()
+    chk = list(reversed([
+      'line-1\n',
+      'line-2',
+      'line-3\n',
+      ]))
+    for line in stream:
+      self.assertEqual(line, chk.pop())
+
+  #----------------------------------------------------------------------------
+  def test_csv(self):
+    import csv
+    reader = csv.reader(asset.load('asset:test/data.csv').stream())
+    self.assertEqual(reader.next(), ['a', 'b', 'c'])
+    self.assertEqual(reader.next(), ['1', '2', '3'])
+    with self.assertRaises(StopIteration):
+      reader.next()
+
+
 #------------------------------------------------------------------------------
 # end of $Id$
 #------------------------------------------------------------------------------

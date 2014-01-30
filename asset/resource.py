@@ -65,6 +65,12 @@ class AssetGroupStream(object):
         return ''
   def close(self):
     pass
+  def __iter__(self):
+    while True:
+      line = self.readline()
+      if not line:
+        return
+      yield line
 
 #------------------------------------------------------------------------------
 class AssetGroup(object):
@@ -116,6 +122,12 @@ class AssetStream(object):
     return self.stream.readline()
   def close(self):
     pass
+  def __iter__(self):
+    while True:
+      line = self.readline()
+      if not line:
+        return
+      yield line
 
 #------------------------------------------------------------------------------
 class Asset(object):
