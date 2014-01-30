@@ -101,6 +101,17 @@ line-2</node>
         'test/data/subdir/subfile1.nl',
         ])
 
+  #----------------------------------------------------------------------------
+  def test_filename(self):
+    # NOTE: this requires that `pxml` was installed as a zipped egg, and
+    # `globre` as an UNzipped egg, i.e.:
+    #   easy_install --zip-ok pxml
+    #   easy_install --always-unzip globre
+    for item in asset.load('globre:__init__.py'):
+      self.assertIsNotNone(item.filename)
+    for item in asset.load('pxml:__init__.py'):
+      self.assertIsNone(item.filename)
+
 #------------------------------------------------------------------------------
 # end of $Id$
 #------------------------------------------------------------------------------

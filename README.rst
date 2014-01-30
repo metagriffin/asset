@@ -93,6 +93,11 @@ Details
 
 TODO: add detailed docs...
 
+* ``Asset.filename``:
+
+  If the asset represents a file on the filesystem, is the absolute
+  path to the specified file. Otherwise is ``None``.
+
 Note: because ``asset.load()`` does lazy-loading, it only throws a
 `NoSuchAsset` exception when you actually attempt to use the
 AssetGroup! If you need an immediate error, use the `peek()` method.

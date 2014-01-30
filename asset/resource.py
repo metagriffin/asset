@@ -162,6 +162,14 @@ class Asset(object):
   def __iter__(self):
     self.peek()
     yield self
+  def __repr__(self):
+    return '<asset "{}:{}">'.format(self.package, self.name)
+  @property
+  def filename(self):
+    prov = pkg_resources.get_provider(self.package)
+    if isinstance(prov, pkg_resources.ZipProvider):
+      return None
+    return pkg_resources.resource_filename(self.package, self.name)
 
 defaultExclude = ('.svn', '.git', '.rcs')
 
