@@ -24,3 +24,5 @@
       unless the asset-spec specifies an attribute...
 
 * make asset.load() complain on unknown keywords, such as `transformer`
+
+* convert the `peek()` method into a .load(lazy=True) parameter.
