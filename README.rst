@@ -16,7 +16,7 @@ Install:
 
   $ pip install asset
 
-Load symbols (e.g. functions, class, or variables) from a package by
+Load symbols (e.g. functions, classes, or variables) from a package by
 name:
 
 .. code-block:: python
@@ -72,10 +72,9 @@ Find out what package is calling the current function:
 .. code-block:: python
 
   # assuming the call stack is:
-  #   function "callfoo" in 
-  #   package "foo" is called from
-  #   package "bar", which is called from
-  #   package "zig"
+  #   in package "zig" a function "x" calls
+  #   in package "bar" a function "y", which calls
+  #   in package "foo" a function "callfoo" defined as:
 
   def callfoo():
 
