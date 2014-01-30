@@ -112,6 +112,22 @@ line-2</node>
     for item in asset.load('pxml:__init__.py'):
       self.assertIsNone(item.filename)
 
+  #----------------------------------------------------------------------------
+  def test_readWithSize(self):
+    self.assertMultiLineEqual(
+      asset.load('asset:test/data/file**').stream().read(),
+      'line-1\nline-2line-3\n')
+    self.assertMultiLineEqual(
+      asset.load('asset:test/data/file**').stream().read(1024),
+      'line-1\nline-2line-3\n')
+    stream = asset.load('asset:test/data/file**').stream()
+    self.assertEqual(stream.read(5), 'line-')
+    self.assertEqual(stream.read(5), '1\nlin')
+    self.assertEqual(stream.read(5), 'e-2li')
+    self.assertEqual(stream.read(3), 'ne-')
+    self.assertEqual(stream.read(3), '3\n')
+    self.assertEqual(stream.read(3), '')
+
 #------------------------------------------------------------------------------
 # end of $Id$
 #------------------------------------------------------------------------------

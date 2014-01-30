@@ -19,28 +19,6 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
-# possible demarkation PACKAGE:RESOURCE:
-#
-# mypkg:foo/bar/zig.html
-# mypkg.foo.bar|zig
-# mypkg.foo.bar#zig
-# mypkg.foo.bar@zig
-# mypkg.foo.bar+zig
-# mypkg.foo.bar=zig
-# mypkg.foo.bar%zig
-# mypkg.foo.bar^zig
-# mypkg.foo.bar&zig
-# mypkg.foo.bar*zig
-# mypkg.foo.bar-zig
-#
-# mypkg.foo.bar?zig
-# mypkg.foo.bar/zig
-# mypkg.foo.bar!zig
-#
-# mypkg.foo.bar>zig
-# mypkg.foo.bar$zig
-# mypkg.foo.bar$zig
-
 import re, os, pkg_resources, functools, six
 import globre
 
@@ -56,25 +34,37 @@ class AssetGroupStream(object):
     self.group  = group
     self.assets = iter(group)
     self._cur   = None
-  def read(self):
-    # todo: make sure this works with binary/text content... ugh.
-    ret = '' if self._cur is None else self._cur.read()
-    ret += ''.join([ast.read() for ast in self.assets])
-    return ret
+  def read(self, size=-1):
+    ret = '' if self._cur is None else self._cur.read(size)
+    if size >= 0 and len(ret) >= size:
+      return ret
+    while True:
+      try:
+        self._cur = self.assets.next()
+      except StopIteration:
+        self._cur = None
+        return ret
+      ret += self._cur.read(size - len(ret))
+      if size >= 0 and len(ret) >= size:
+        return ret
   def readline(self):
     if self._cur is None:
       try:
         self._cur = self.assets.next()
       except StopIteration:
+        self._cur = None
         return ''
-    while 1:
+    while True:
       ret = self._cur.readline()
       if ret:
         return ret
       try:
         self._cur = self.assets.next()
       except StopIteration:
+        self._cur = None
         return ''
+  def close(self):
+    pass
 
 #------------------------------------------------------------------------------
 class AssetGroup(object):
@@ -109,8 +99,8 @@ class AssetGroup(object):
     if self._fp is None:
       self._fp = self.stream()
     return self._fp
-  def read(self):
-    return self._stream().read()
+  def read(self, size=-1):
+    return self._stream().read(size)
   def readline(self):
     return self._stream().readline()
 
@@ -120,10 +110,12 @@ class AssetStream(object):
   def __init__(self, stream, asset):
     self.stream = stream
     self.asset  = asset
-  def read(self):
-    return self.stream.read()
+  def read(self, size=-1):
+    return self.stream.read(size)
   def readline(self):
     return self.stream.readline()
+  def close(self):
+    pass
 
 #------------------------------------------------------------------------------
 class Asset(object):
@@ -144,8 +136,8 @@ class Asset(object):
     if self._fp is None:
       self._fp = self.stream()
     return self._fp
-  def read(self):
-    return self._stream().read()
+  def read(self, size=-1):
+    return self._stream().read(size)
   def readline(self):
     return self._stream().readline()
   # compatibility with AssetGroup() API...
