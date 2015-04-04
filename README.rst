@@ -72,7 +72,7 @@ Find out what package is calling the current function:
 .. code-block:: python
 
   # assuming the call stack is:
-  #   in package "zig" a function "x" calls
+  #   in package "zig" a function "x", which calls
   #   in package "bar" a function "y", which calls
   #   in package "foo" a function "callfoo" defined as:
 
