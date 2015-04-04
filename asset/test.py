@@ -19,12 +19,17 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
-import unittest, pxml, xml.etree.ElementTree as ET
+import unittest
+import pxml
+import xml.etree.ElementTree as ET
+import six
 
 import asset
 
 #------------------------------------------------------------------------------
 class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
+
+  maxDiff = None
 
   #----------------------------------------------------------------------------
   def test_version(self):
@@ -43,9 +48,9 @@ class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
        'asset:test/data/subdir/subfile1.nl'])
     self.assertEqual(
       [ast.read() for ast in asset.load('asset:test/data/**.nl')],
-      ['line-1\nline-2',
-       'line-3\n',
-       'sub-file-line-1\n'])
+      [b'line-1\nline-2',
+       b'line-3\n',
+       b'sub-file-line-1\n'])
 
   #----------------------------------------------------------------------------
   def test_load_single(self):
@@ -61,24 +66,24 @@ class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
   #----------------------------------------------------------------------------
   def test_load_group_read(self):
     self.assertEqual(
-      asset.load('asset:test/data/file1.nl').read(), 'line-1\nline-2')
+      asset.load('asset:test/data/file1.nl').read(), b'line-1\nline-2')
     self.assertEqual(
-      asset.load('asset:test/data/file2.nl').read(), 'line-3\n')
+      asset.load('asset:test/data/file2.nl').read(), b'line-3\n')
     self.assertEqual(
-      asset.load('asset:test/data/*.nl').read(), 'line-1\nline-2line-3\n')
+      asset.load('asset:test/data/*.nl').read(), b'line-1\nline-2line-3\n')
     ag = asset.load('asset:test/data/*.nl')
-    self.assertEqual(ag.readline(), 'line-1\n')
-    self.assertEqual(ag.readline(), 'line-2')
-    self.assertEqual(ag.readline(), 'line-3\n')
+    self.assertEqual(ag.readline(), b'line-1\n')
+    self.assertEqual(ag.readline(), b'line-2')
+    self.assertEqual(ag.readline(), b'line-3\n')
 
   #----------------------------------------------------------------------------
   def test_load_example(self):
     out = ET.Element('nodes')
     for item in asset.load('asset:test/data/**.nl'):
       cur = ET.SubElement(out, 'node', name=item.name)
-      cur.text = item.read()
+      cur.text = item.read().decode()
     out = ET.tostring(out)
-    chk = '''\
+    chk = b'''\
 <nodes>
   <node name="test/data/file1.nl">line-1
 line-2</node>
@@ -99,7 +104,7 @@ line-2</node>
         'test/data/file2.nl',
         'test/data/subdir/',
         'test/data/subdir/subfile1.nl',
-        ])
+      ])
 
   #----------------------------------------------------------------------------
   def test_filename(self):
@@ -114,44 +119,45 @@ line-2</node>
 
   #----------------------------------------------------------------------------
   def test_readWithSize(self):
-    self.assertMultiLineEqual(
+    self.assertEqual(
       asset.load('asset:test/data/file**').stream().read(),
-      'line-1\nline-2line-3\n')
-    self.assertMultiLineEqual(
+      b'line-1\nline-2line-3\n')
+    self.assertEqual(
       asset.load('asset:test/data/file**').stream().read(1024),
-      'line-1\nline-2line-3\n')
+      b'line-1\nline-2line-3\n')
     stream = asset.load('asset:test/data/file**').stream()
-    self.assertEqual(stream.read(5), 'line-')
-    self.assertEqual(stream.read(5), '1\nlin')
-    self.assertEqual(stream.read(5), 'e-2li')
-    self.assertEqual(stream.read(3), 'ne-')
-    self.assertEqual(stream.read(3), '3\n')
-    self.assertEqual(stream.read(3), '')
+    self.assertEqual(stream.read(5), b'line-')
+    self.assertEqual(stream.read(5), b'1\nlin')
+    self.assertEqual(stream.read(5), b'e-2li')
+    self.assertEqual(stream.read(3), b'ne-')
+    self.assertEqual(stream.read(3), b'3\n')
+    self.assertEqual(stream.read(3), b'')
 
   #----------------------------------------------------------------------------
   def test_streamIteration(self):
     stream = asset.load('asset:test/data/file**').stream()
-    self.assertEqual(stream.readline(), 'line-1\n')
-    self.assertEqual(stream.readline(), 'line-2')
-    self.assertEqual(stream.readline(), 'line-3\n')
-    self.assertEqual(stream.readline(), '')
+    self.assertEqual(stream.readline(), b'line-1\n')
+    self.assertEqual(stream.readline(), b'line-2')
+    self.assertEqual(stream.readline(), b'line-3\n')
+    self.assertEqual(stream.readline(), b'')
     stream = asset.load('asset:test/data/file**').stream()
     chk = list(reversed([
-      'line-1\n',
-      'line-2',
-      'line-3\n',
-      ]))
+      b'line-1\n',
+      b'line-2',
+      b'line-3\n',
+    ]))
     for line in stream:
       self.assertEqual(line, chk.pop())
 
   #----------------------------------------------------------------------------
   def test_csv(self):
     import csv
-    reader = csv.reader(asset.load('asset:test/data.csv').stream())
-    self.assertEqual(reader.next(), ['a', 'b', 'c'])
-    self.assertEqual(reader.next(), ['1', '2', '3'])
+    lines  = [line.decode() for line in asset.load('asset:test/data.csv').stream()]
+    reader = csv.reader(lines)
+    self.assertEqual(six.next(reader), ['a', 'b', 'c'])
+    self.assertEqual(six.next(reader), ['1', '2', '3'])
     with self.assertRaises(StopIteration):
-      reader.next()
+      six.next(reader)
 
 
 #------------------------------------------------------------------------------

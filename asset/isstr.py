@@ -19,10 +19,9 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
-import sys
-PY3 = sys.version_info[0] >= 3
+import six
 
-if PY3:
+if six.PY3:
   def isstr(obj):
     return isinstance(obj, str)
 else:

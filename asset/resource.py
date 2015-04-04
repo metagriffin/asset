@@ -19,7 +19,11 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 #------------------------------------------------------------------------------
 
-import re, os, pkg_resources, functools, six
+import re
+import os
+import pkg_resources
+import functools
+import six
 import globre
 
 from .symbol import symbol
@@ -35,34 +39,34 @@ class AssetGroupStream(object):
     self.assets = iter(group)
     self._cur   = None
   def read(self, size=-1):
-    ret = '' if self._cur is None else self._cur.read(size)
+    ret = b'' if self._cur is None else self._cur.read(size)
     if size >= 0 and len(ret) >= size:
       return ret
     while True:
       try:
-        self._cur = self.assets.next()
+        self._cur = six.next(self.assets)
       except StopIteration:
         self._cur = None
         return ret
-      ret += self._cur.read(size - len(ret))
+      ret += self._cur.read(( size - len(ret) ) if size > 0 else -1)
       if size >= 0 and len(ret) >= size:
         return ret
   def readline(self):
     if self._cur is None:
       try:
-        self._cur = self.assets.next()
+        self._cur = six.next(self.assets)
       except StopIteration:
         self._cur = None
-        return ''
+        return b''
     while True:
       ret = self._cur.readline()
       if ret:
         return ret
       try:
-        self._cur = self.assets.next()
+        self._cur = six.next(self.assets)
       except StopIteration:
         self._cur = None
-        return ''
+        return b''
   def close(self):
     pass
   def __iter__(self):
@@ -175,7 +179,7 @@ class Asset(object):
       return None
     return pkg_resources.resource_filename(self.package, self.name)
 
-defaultExclude = ('.svn', '.git', '.rcs')
+defaultExclude = ('.rcs', '.svn', '.git', '.hg')
 
 #------------------------------------------------------------------------------
 def listres(pkgname, pkgdir,
