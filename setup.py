@@ -34,15 +34,15 @@ def read(*parts, **kw):
 
 test_dependencies = [
   'nose                 >= 1.3.0',
-  'coverage             >= 3.6',
-  'pxml                 >= 0.2.10',
-  ]
+  'coverage             >= 3.5.3',
+  'pxml                 >= 0.2.11',  # note: *MUST* be install as an egg
+]
 
 dependencies = [
   'distribute           >= 0.6.24',
   'globre               >= 0.0.5',
   'six                  >= 1.4.1',
-  ]
+]
 
 entrypoints = None
 
@@ -53,7 +53,7 @@ classifiers = [
   'Operating System :: OS Independent',
   'Natural Language :: English',
   'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-  ]
+]
 
 setup(
   name                  = 'asset',
@@ -74,7 +74,7 @@ setup(
   test_suite            = 'asset',
   entry_points          = entrypoints,
   license               = 'GPLv3+',
-  )
+)
 
 #------------------------------------------------------------------------------
 # end of $Id$
