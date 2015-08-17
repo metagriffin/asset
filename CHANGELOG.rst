@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.6.2
+======
+
+* Removed distribute dependency (thanks jlec)
+
+
 v0.6.1
 ======
 
