@@ -88,6 +88,23 @@ Find out what package is calling the current function:
     # ==> None
 
 
+Testing
+=======
+
+In order to run the unit tests correctly, the `pxml` package needs to
+be installed as a zipped package (i.e. an "egg") and the `globre`
+package needs to be installed unzipped. To accomplish that, do:
+
+.. code:: bash
+
+  $ easy_install --zip-ok pxml
+  $ easy_install --always-unzip globre
+
+The reason is that the unit tests confirm that `asset` can load assets
+from both zipped and unzipped packages, and can also identify in which
+mode it is operating.
+
+
 Details
 =======
 
