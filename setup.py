@@ -35,10 +35,16 @@ def read(*parts, **kw):
 test_dependencies = [
   'nose                 >= 1.3.0',
   'coverage             >= 3.5.3',
-  'pxml                 >= 0.2.11',  # note: *MUST* be install as an egg
+  # note: `pxml` should be installed as an egg, i.e.:
+  #         easy_install --zip-ok pxml
+  #       for the unit tests to be able to test that.
+  'pxml                 >= 0.2.11',
 ]
 
 dependencies = [
+  # note: `globre` should be installed unzipped, i.e.:
+  #         easy_install --always-unzip globre
+  #       for the unit tests to be able to test that.
   'globre               >= 0.0.5',
   'six                  >= 1.4.1',
 ]

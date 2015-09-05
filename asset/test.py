@@ -20,11 +20,19 @@
 #------------------------------------------------------------------------------
 
 import unittest
-import pxml
+import os.path
 import xml.etree.ElementTree as ET
+
+import pxml
 import six
+import pkg_resources
 
 import asset
+
+#------------------------------------------------------------------------------
+def isEgg(pkg):
+  dist = pkg_resources.get_distribution(pkg)
+  return os.path.isfile(dist.location)
 
 #------------------------------------------------------------------------------
 class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
@@ -107,15 +115,22 @@ line-2</node>
       ])
 
   #----------------------------------------------------------------------------
-  def test_filename(self):
-    # NOTE: this requires that `pxml` was installed as a zipped egg, and
-    # `globre` as an UNzipped egg, i.e.:
+  def test_filename_egg(self):
+    # NOTE: this requires that `pxml` be installed as a zipped egg, i.e.:
     #   easy_install --zip-ok pxml
-    #   easy_install --always-unzip globre
-    for item in asset.load('globre:__init__.py'):
-      self.assertIsNotNone(item.filename)
+    if not isEgg('pxml'):
+      raise unittest.SkipTest('package "pxml" must be installed as a zipped egg')
     for item in asset.load('pxml:__init__.py'):
       self.assertIsNone(item.filename)
+
+  #----------------------------------------------------------------------------
+  def test_filename_noegg(self):
+    # NOTE: this requires that `globre` be installed as an UNzipped pkg, i.e.:
+    #   easy_install --always-unzip globre
+    if isEgg('globre'):
+      raise unittest.SkipTest('package "globre" must not be installed as a zipped egg')
+    for item in asset.load('globre:__init__.py'):
+      self.assertIsNotNone(item.filename)
 
   #----------------------------------------------------------------------------
   def test_readWithSize(self):
