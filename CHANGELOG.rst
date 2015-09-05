@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.6.3
+======
+
+* Added check for egg vs. not-egg in unit tests
+
+
 v0.6.2
 ======
 
