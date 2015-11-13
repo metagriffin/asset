@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 import pxml
 import six
 import pkg_resources
+from aadict import aadict
 
 import asset
 
@@ -173,6 +174,157 @@ line-2</node>
     self.assertEqual(six.next(reader), ['1', '2', '3'])
     with self.assertRaises(StopIteration):
       six.next(reader)
+
+
+#------------------------------------------------------------------------------
+class TestPlugins(unittest.TestCase):
+
+  maxDiff = None
+
+  #----------------------------------------------------------------------------
+  def test_plugin_sorting_intra(self):
+    from .plugin import _sort_plugins
+    self.assertEqual(
+      list(_sort_plugins('myext', [
+        aadict(name='foo', after=None, before=None, order=8, replace=False, final=True),
+        aadict(name='foo', after=None, before=None, order=2, replace=False, final=False),
+        aadict(name='foo', after=None, before=None, order=9, replace=False, final=False),
+        aadict(name='foo', after=None, before=None, order=5, replace=True,  final=False),
+      ])), [
+        aadict(name='foo', after=None, before=None, order=5, replace=True,  final=False),
+        aadict(name='foo', after=None, before=None, order=8, replace=False, final=True),
+      ])
+
+  #----------------------------------------------------------------------------
+  def test_plugin_sorting_inter(self):
+    from .plugin import _sort_plugins
+    self.assertEqual(
+      list(_sort_plugins('myext', [
+        aadict(name='a', after=None,  before=None, order=8, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=9, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+      ])), [
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+      ])
+
+  #----------------------------------------------------------------------------
+  def test_plugin_sorting_spec_valid(self):
+    from .plugin import _sort_plugins
+    self.assertEqual(
+      list(_sort_plugins('myext', [
+        aadict(name='a', after=None,  before=None, order=8, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=9, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+      ], 'c,b,a')), [
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+      ])
+    self.assertEqual(
+      list(_sort_plugins('myext', [
+        aadict(name='a', after=None,  before=None, order=8, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=9, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+      ], '!c')), [
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+      ])
+
+  #----------------------------------------------------------------------------
+  def test_plugin_sorting_spec_invalid(self):
+    from .plugin import _sort_plugins
+    with self.assertRaises(TypeError) as cm:
+      list(_sort_plugins('myext', [
+        aadict(name='a', after=None,  before=None, order=8, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=9, replace=False, final=False),
+        aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
+        aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
+      ], '!c,b'))
+    self.assertEqual(
+      str(cm.exception),
+      "myext plugin type 'a' specified unavailable 'after' dependency 'b'")
+
+  #----------------------------------------------------------------------------
+  def test_plugin_sorting_unavailable(self):
+    from .plugin import _sort_plugins
+    with self.assertRaises(TypeError) as cm:
+      list(_sort_plugins('myext', [
+        aadict(name='bar', after='foo', before=None, order=0, replace=False, final=False),
+      ]))
+    self.assertEqual(
+      str(cm.exception),
+      "myext plugin type 'bar' specified unavailable 'after' dependency 'foo'")
+    with self.assertRaises(TypeError) as cm:
+      list(_sort_plugins('myext', [
+        aadict(name='bar', after=None, before='foo', order=0, replace=False, final=False),
+      ]))
+    self.assertEqual(
+      str(cm.exception),
+      "myext plugin type 'bar' specified unavailable 'before' dependency 'foo'")
+    with self.assertRaises(TypeError) as cm:
+      list(_sort_plugins('myext', [
+        aadict(name='foo', after=None, before='bar', order=0, replace=False, final=False),
+        aadict(name='bar', after=None, before='foo', order=0, replace=False, final=False),
+      ]))
+    self.assertEqual(
+      str(cm.exception),
+      "myext has cyclical dependencies in plugins ['bar', 'foo']")
+
+  #----------------------------------------------------------------------------
+  def test_plugin_spec_valid(self):
+    import re
+    from .plugin import _parse_spec
+    self.assertEqual(_parse_spec(None), ())
+    self.assertEqual(_parse_spec('*'), ())
+    self.assertEqual(_parse_spec('!foo,bar'), (('!', 'foo'), ('!', 'bar')))
+    self.assertEqual(_parse_spec('!foo,!bar'), (('!', 'foo'), ('!', 'bar')))
+    self.assertEqual(_parse_spec(' ! foo, ! bar'), (('!', 'foo'), ('!', 'bar')))
+    self.assertEqual(_parse_spec('foo,?bar'), (('+', 'foo'), ('?', 'bar')))
+    self.assertEqual(_parse_spec('foo,?bar'), (('+', 'foo'), ('?', 'bar')))
+    self.assertEqual(
+      _parse_spec('/(foo|bar)/'),
+      (('/', re.compile('(foo|bar)')),))
+
+  #----------------------------------------------------------------------------
+  def test_plugin_spec_invalid(self):
+    from .plugin import _parse_spec
+    with self.assertRaises(ValueError) as cm:
+      _parse_spec('foo,!bar')
+    self.assertEqual(
+      str(cm.exception),
+      'invalid mixing of "!" prefixes and required plugins in plugin specification')
+    with self.assertRaises(ValueError) as cm:
+      _parse_spec('!foo,?bar')
+    self.assertEqual(
+      str(cm.exception),
+      'invalid mixing of "!" and "?" prefixes in plugin specification')
+    with self.assertRaises(ValueError) as cm:
+      _parse_spec('/foo')
+    self.assertEqual(
+      str(cm.exception),
+      'regex plugin loading specification must start and end with "/"')
+
+  #----------------------------------------------------------------------------
+  def test_plugin_spec_match(self):
+    from .plugin import _parse_spec, _match_spec
+    self.assertTrue(_match_spec(_parse_spec('*'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('/foo/'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('/(foo|bar)/'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('/(foo|bar)/'), 'bar'))
+    self.assertTrue(_match_spec(_parse_spec('foo,?bar'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('foo,?bar'), 'bar'))
+    self.assertTrue(_match_spec(_parse_spec('!foo'), 'bar'))
+    self.assertFalse(_match_spec(_parse_spec('!foo'), 'foo'))
+    self.assertFalse(_match_spec(_parse_spec('foo,?bar'), 'zog'))
 
 
 #------------------------------------------------------------------------------

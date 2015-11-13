@@ -47,6 +47,7 @@ dependencies = [
   #       for the unit tests to be able to test that.
   'globre               >= 0.0.5',
   'six                  >= 1.4.1',
+  'aadict               >= 0.2.2',
 ]
 
 entrypoints = None

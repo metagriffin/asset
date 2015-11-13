@@ -22,6 +22,7 @@
 from .symbol import *
 from .resource import *
 from .isstr import isstr
+from .plugin import plugins
 
 #------------------------------------------------------------------------------
 # end of $Id$
