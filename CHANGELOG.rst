@@ -3,6 +3,13 @@ ChangeLog
 =========
 
 
+v0.6.4
+======
+
+* Added `asset.plugins` plugin loading mechanism that supports simple
+  ordering and overriding of plugins
+
+
 v0.6.3
 ======
 
