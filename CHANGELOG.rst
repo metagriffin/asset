@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.6.6
+======
+
+* Corrected regex negative handling
+
+
 v0.6.5
 ======
 
