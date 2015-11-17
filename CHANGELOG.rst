@@ -3,6 +3,13 @@ ChangeLog
 =========
 
 
+v0.6.5
+======
+
+* Updated `asset.plugins` to support loading of unregistered plugins
+* Changed ``'!'`` `asset.plugins` prefix to ``'-'``
+
+
 v0.6.4
 ======
 
