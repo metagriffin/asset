@@ -33,6 +33,7 @@ log = logging.getLogger(__name__)
 
 #------------------------------------------------------------------------------
 def plugins(group, spec=None):
+  # TODO: share this documentation with `../doc/plugin.rst`...
   '''
   Returns a list of plugins for the specified setuptools-style
   entrypoint `group`. This is just a wrapper around
@@ -49,8 +50,8 @@ def plugins(group, spec=None):
 
   The optional `spec` parameter controls how and what plugins are
   loaded. If it is ``None`` or the special value ``'*'``, then the
-  normal plugin loading will occur, i.e. the all registered plugins
-  will be loaded and their own ordering and dependencies will be
+  normal plugin loading will occur, i.e. all registered plugins will
+  be loaded and their self-declared ordering and dependencies will be
   applied.
 
   Otherwise, the `spec` is taken as a comma- or whitespace-separated
@@ -58,8 +59,8 @@ def plugins(group, spec=None):
   an exact list of plugins to load, in the specified order, referred
   to as an "absolute" spec. Otherwise, it is a "relative" spec, which
   indicates that it only adjusts the standard registered plugin
-  loading. A spec is either absolute or relative, and they cannot be
-  mixed.
+  loading. A spec is a list of either absolute or relative
+  instructions, and they cannot be mixed.
 
   In either mode, a plugin is identified either by name for registered
   plugins (e.g. ``foo``), or by fully-qualified Python module and
