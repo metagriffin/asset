@@ -33,15 +33,15 @@ Plugin Structure
 The `asset.plugins` function returns a generator of objects that have
 the following attributes:
 
-* ``name``
+* **name**
 
   the name of the plugin type
 
-* ``handle``
+* **handle**
 
   the actual plugin symbol
 
-* ``entrypoint``
+* **entrypoint**
 
   for registered plugins, the setuptools EntryPoint object, otherwise
   ``None``
@@ -53,22 +53,32 @@ Plugin Ordering and Dependency
 Each plugin handle can have the following special attributes that
 control plugin ordering and dependency management:
 
-* `after` : comma-separated list of plugin types that this plugin
-  should be loaded *after* (default is none).
+* **after**
 
-* `before` : comma-separated list of plugin types that this plugin
-  should be loaded *before* (default is none).
+  comma-separated list of plugin types that this plugin should be
+  loaded *after* (default is none).
 
-* `order` : when multiple plugins are registered for the same type,
-  this specifies the numerical order of this plugin (default is 0).
+* **before**
 
-* `replace` : boolean that controls whether or not this plugin should
-  replace the plugins of the same type that are ordered before it,
-  i.e. that have a lower `order` value (default is false).
+  comma-separated list of plugin types that this plugin should be
+  loaded *before* (default is none).
 
-* `final` : boolean that controls whether or not this plugin should be
-  the last of the plugins of the same type, i.e. plugins that have a
-  higher `order` value will be ignored (default is false).
+* **order**
+
+  when multiple plugins are registered for the same type, this
+  specifies the numerical order of this plugin (default is 0).
+
+* **replace**
+
+  boolean that controls whether or not this plugin should replace the
+  plugins of the same type that are ordered before it, i.e. that have
+  a lower `order` value (default is false).
+
+* **final**
+
+  boolean that controls whether or not this plugin should be the last
+  of the plugins of the same type, i.e. plugins that have a higher
+  `order` value will be ignored (default is false).
 
 
 Load Specification
