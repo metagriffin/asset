@@ -181,6 +181,9 @@ class TestPlugins(unittest.TestCase):
 
   maxDiff = None
 
+  @staticmethod
+  def method(): pass
+
   #----------------------------------------------------------------------------
   def test_plugin_sorting_intra(self):
     from .plugin import _sort_plugins
@@ -233,7 +236,7 @@ class TestPlugins(unittest.TestCase):
         aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
         aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
         aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
-      ], '!c')), [
+      ], '-c')), [
         aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
         aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
       ])
@@ -248,7 +251,7 @@ class TestPlugins(unittest.TestCase):
         aadict(name='b', after=None,  before=None, order=2, replace=False, final=True),
         aadict(name='a', after='b',   before=None, order=5, replace=False, final=True),
         aadict(name='c', after=None,  before='a',  order=0, replace=False, final=False),
-      ], '!c,b'))
+      ], '-c,-b'))
     self.assertEqual(
       str(cm.exception),
       "myext plugin type 'a' specified unavailable 'after' dependency 'b'")
@@ -285,33 +288,45 @@ class TestPlugins(unittest.TestCase):
     from .plugin import _parse_spec
     self.assertEqual(_parse_spec(None), ())
     self.assertEqual(_parse_spec('*'), ())
-    self.assertEqual(_parse_spec('!foo,bar'), (('!', 'foo'), ('!', 'bar')))
-    self.assertEqual(_parse_spec('!foo,!bar'), (('!', 'foo'), ('!', 'bar')))
-    self.assertEqual(_parse_spec(' ! foo, ! bar'), (('!', 'foo'), ('!', 'bar')))
-    self.assertEqual(_parse_spec('foo,?bar'), (('+', 'foo'), ('?', 'bar')))
-    self.assertEqual(_parse_spec('foo,?bar'), (('+', 'foo'), ('?', 'bar')))
+    self.assertEqual(_parse_spec('-foo,+bar'), (('-', 'foo'), ('+', 'bar')))
+    self.assertEqual(_parse_spec('-foo,-bar'), (('-', 'foo'), ('-', 'bar')))
+    self.assertEqual(_parse_spec(' - foo, - bar'), (('-', 'foo'), ('-', 'bar')))
+    self.assertEqual(_parse_spec(' - foo - bar '), (('-', 'foo'), ('-', 'bar')))
+    self.assertEqual(_parse_spec('foo,?bar'), ((' ', 'foo'), ('?', 'bar')))
+    self.assertEqual(_parse_spec('foo,?bar'), ((' ', 'foo'), ('?', 'bar')))
     self.assertEqual(
       _parse_spec('/(foo|bar)/'),
       (('/', re.compile('(foo|bar)')),))
+    self.assertEqual(
+      _parse_spec('+zig,/(foo|bar)/'),
+      (('+', 'zig'), ('/', re.compile('(foo|bar)'))))
+    self.assertEqual(
+      _parse_spec('/zig,/(foo|bar)/'),
+      (('/', re.compile('zig,/(foo|bar)')),))
 
   #----------------------------------------------------------------------------
   def test_plugin_spec_invalid(self):
     from .plugin import _parse_spec
     with self.assertRaises(ValueError) as cm:
-      _parse_spec('foo,!bar')
+      _parse_spec('foo,-bar')
     self.assertEqual(
       str(cm.exception),
-      'invalid mixing of "!" prefixes and required plugins in plugin specification')
+      "invalid mixing of relative (['-']) and absolute ([' ']) prefixes in plugin specification")
     with self.assertRaises(ValueError) as cm:
-      _parse_spec('!foo,?bar')
+      _parse_spec('-foo,bar')
     self.assertEqual(
       str(cm.exception),
-      'invalid mixing of "!" and "?" prefixes in plugin specification')
+      "invalid mixing of relative (['-']) and absolute ([' ']) prefixes in plugin specification")
+    with self.assertRaises(ValueError) as cm:
+      _parse_spec('-foo,?bar')
+    self.assertEqual(
+      str(cm.exception),
+      "invalid mixing of relative (['-']) and absolute (['?']) prefixes in plugin specification")
     with self.assertRaises(ValueError) as cm:
       _parse_spec('/foo')
     self.assertEqual(
       str(cm.exception),
-      'regex plugin loading specification must start and end with "/"')
+      'regex plugin loading expression must start and end with "/"')
 
   #----------------------------------------------------------------------------
   def test_plugin_spec_match(self):
@@ -322,10 +337,45 @@ class TestPlugins(unittest.TestCase):
     self.assertTrue(_match_spec(_parse_spec('/(foo|bar)/'), 'bar'))
     self.assertTrue(_match_spec(_parse_spec('foo,?bar'), 'foo'))
     self.assertTrue(_match_spec(_parse_spec('foo,?bar'), 'bar'))
-    self.assertTrue(_match_spec(_parse_spec('!foo'), 'bar'))
-    self.assertFalse(_match_spec(_parse_spec('!foo'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('-foo'), 'bar'))
+    self.assertFalse(_match_spec(_parse_spec('-foo'), 'foo'))
     self.assertFalse(_match_spec(_parse_spec('foo,?bar'), 'zog'))
+    self.assertTrue(_match_spec(_parse_spec('+foo'), 'foo'))
+    self.assertTrue(_match_spec(_parse_spec('+foo'), 'bar'))
 
+  #----------------------------------------------------------------------------
+  def test_plugin_asset_load(self):
+    from .plugin import plugins, _load_asset_plugin
+    self.assertEqual(
+      _load_asset_plugin('asset.test.TestPlugins.method').handle,
+      self.method)
+    plugs = list(plugins('test-group', 'asset.test.TestPlugins.method'))
+    self.assertEqual(
+      [plin.handle for plin in plugs],
+      [self.method])
+    with self.assertRaises(ValueError) as cm:
+      list(plugins('test-group', 'asset.test.TestPlugins.no_such_method'))
+    self.assertEqual(
+      str(cm.exception),
+      "could not load plugin 'asset.test.TestPlugins.no_such_method'")
+
+  #----------------------------------------------------------------------------
+  def test_plugin_asset_mixed(self):
+    from .plugin import _sort_plugins
+    self.assertEqual(
+      list(_sort_plugins('myext', [
+        aadict(name='a',   after=None,  before=None, order=8, replace=False, final=False),
+        aadict(name='b',   after=None,  before=None, order=9, replace=False, final=False),
+        aadict(name='b',   after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='a',   after='b',   before=None, order=5, replace=False, final=True),
+        aadict(name='c',   after=None,  before='b',  order=0, replace=False, final=False),
+        aadict(name='d.e', after='b',   before='a',  order=0, replace=False, final=False),
+      ], '+d.e')), [
+        aadict(name='c',   after=None,  before='b',  order=0, replace=False, final=False),
+        aadict(name='b',   after=None,  before=None, order=2, replace=False, final=True),
+        aadict(name='d.e', after='b', before='a',  order=0, replace=False, final=False),
+        aadict(name='a',   after='b',   before=None, order=5, replace=False, final=True),
+      ])
 
 #------------------------------------------------------------------------------
 # end of $Id$
