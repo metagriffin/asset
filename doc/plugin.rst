@@ -33,15 +33,15 @@ Plugin Structure
 The `asset.plugins` function returns a generator of objects that have
 the following attributes:
 
-* `name`
+* ``name``
 
   the name of the plugin type
 
-* `handle`
+* ``handle``
 
   the actual plugin symbol
 
-* `entrypoint`
+* ``entrypoint``
 
   for registered plugins, the setuptools EntryPoint object, otherwise
   ``None``
