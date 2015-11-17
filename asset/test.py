@@ -333,6 +333,7 @@ class TestPlugins(unittest.TestCase):
     from .plugin import _parse_spec, _match_spec
     self.assertTrue(_match_spec(_parse_spec('*'), 'foo'))
     self.assertTrue(_match_spec(_parse_spec('/foo/'), 'foo'))
+    self.assertFalse(_match_spec(_parse_spec('/foo/'), 'bar'))
     self.assertTrue(_match_spec(_parse_spec('/(foo|bar)/'), 'foo'))
     self.assertTrue(_match_spec(_parse_spec('/(foo|bar)/'), 'bar'))
     self.assertTrue(_match_spec(_parse_spec('foo,?bar'), 'foo'))

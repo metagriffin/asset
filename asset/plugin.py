@@ -178,10 +178,12 @@ def _parse_spec(spec):
 def _match_spec(spec, name):
   if not spec:
     return True
-  for item in spec:
+  for idx, item in enumerate(spec):
     if item[0] == SPEC_RE:
       if item[1].match(name):
         return True
+      if ( idx + 1 ) >= len(spec):
+        return False
       continue
     if item[1] != name:
       continue
