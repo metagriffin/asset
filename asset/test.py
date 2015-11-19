@@ -378,6 +378,28 @@ class TestPlugins(unittest.TestCase):
         aadict(name='a',   after='b',   before=None, order=5, replace=False, final=True),
       ])
 
+  #----------------------------------------------------------------------------
+  def test_plugin_decorator(self):
+    from .plugin import plugin
+    @plugin('asset.example', 'foo', before='bar')
+    def my_foo_plugin(): pass
+    @plugin('asset.example', 'bar', after='foo', order=3, replace=True, final=True)
+    def my_bar_plugin(): pass
+    self.assertEqual(my_foo_plugin.plugin_group, 'asset.example')
+    self.assertEqual(my_foo_plugin.plugin_name, 'foo')
+    self.assertEqual(my_foo_plugin.before, 'bar')
+    self.assertFalse(hasattr(my_foo_plugin, 'after'))
+    self.assertFalse(hasattr(my_foo_plugin, 'order'))
+    self.assertFalse(hasattr(my_foo_plugin, 'replace'))
+    self.assertFalse(hasattr(my_foo_plugin, 'final'))
+    self.assertEqual(my_bar_plugin.plugin_group, 'asset.example')
+    self.assertEqual(my_bar_plugin.plugin_name, 'bar')
+    self.assertEqual(my_bar_plugin.after, 'foo')
+    self.assertFalse(hasattr(my_bar_plugin, 'before'))
+    self.assertEqual(my_bar_plugin.order, 3)
+    self.assertEqual(my_bar_plugin.replace, True)
+    self.assertEqual(my_bar_plugin.final, True)
+
 #------------------------------------------------------------------------------
 # end of $Id$
 #------------------------------------------------------------------------------

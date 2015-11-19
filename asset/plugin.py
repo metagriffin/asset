@@ -331,6 +331,24 @@ def _sort_plugins(group, plugins, spec=None):
       yield plug
 
 #------------------------------------------------------------------------------
+def plugin(group, name, after=None, before=None, order=None, replace=None, final=None):
+  def _wrapper(func):
+    func.plugin_group = group
+    func.plugin_name  = name
+    if after is not None:
+      func.after = after
+    if before is not None:
+      func.before = before
+    if order is not None:
+      func.order = order
+    if replace is not None:
+      func.replace = replace
+    if final is not None:
+      func.final = final
+    return func
+  return _wrapper
+
+#------------------------------------------------------------------------------
 # end of $Id$
 # $ChangeLog$
 #------------------------------------------------------------------------------
