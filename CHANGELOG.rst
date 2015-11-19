@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.6.7
+======
+
+* Added initial implementation of `asset.plugin` helper decorator
+
+
 v0.6.6
 ======
 
