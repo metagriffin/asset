@@ -1,3 +1,10 @@
+* make a setup directive that can find and populate all
+  `asset.plugin()` calls
+
+* make `asset.plugin()` calls check that the `group` starts
+  with the caller's package for namespacing and if not issue
+  a log.warning()
+
 * make NoSuchAsset subclass IOError?...
 
 * add support for "file://" paths so that asset() can be used
