@@ -25,7 +25,7 @@ import logging
 import six
 import pkg_resources
 from aadict import aadict
-import asset
+from .symbol import symbol
 
 #------------------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ def _load_asset_plugin(spec):
   plugin = aadict(
     name         = spec,
     entrypoint   = None,
-    handle       = asset.symbol(spec),
+    handle       = symbol(spec),
   )
   _decorate_plugin(plugin)
   return plugin
