@@ -32,21 +32,76 @@ from .symbol import symbol
 log = logging.getLogger(__name__)
 
 #------------------------------------------------------------------------------
+class PluginSet(object):
+  '''
+  A PluginSet is a list of `Plugin` objects that can be iterated over
+  to get each Plugin, but it also has some methods that operate on all
+  plugins together.
+  '''
+
+  #----------------------------------------------------------------------------
+  def __init__(self, group, spec, plugins, *args, **kw):
+    super(PluginSet, self).__init__(*args, **kw)
+    self.group   = group
+    self.spec    = spec
+    self.plugins = plugins or []
+
+  #----------------------------------------------------------------------------
+  def handle(self, object, *args, **kw):
+    '''
+    Calls each plugin in this PluginSet with the specified object,
+    arguments, and keywords in the standard group plugin order. The
+    return value from each successive invoked plugin is passed as the
+    first parameter to the next plugin. The final return value is the
+    object returned from the last plugin.
+
+    If this plugin set is empty (i.e. no plugins exist or matched the
+    spec), then a ValueError exception is thrown.
+    '''
+    if not bool(self):
+      if not self.spec or self.spec == SPEC_ALL:
+        raise ValueError('No plugins available in group %r' % (self.group,))
+      raise ValueError(
+        'No plugins matched in group %r matched %r' % (self.group, self.spec))
+    for plugin in self.plugins:
+      object = plugin.handle(object, *args, **kw)
+    return object
+
+  #----------------------------------------------------------------------------
+  def filter(self, object, *args, **kw):
+    '''
+    Identical to `PluginSet.handle`, except:
+
+    #. If this plugin set is empty, `object` is returned as-is.
+    #. If any plugin returns ``None``, it is returned without
+       calling any further plugins.
+    '''
+    for plugin in self.plugins:
+      object = plugin.handle(object, *args, **kw)
+      if object is None:
+        return object
+    return object
+
+  #----------------------------------------------------------------------------
+  def __bool__(self):
+    return bool(self.plugins)
+
+  #----------------------------------------------------------------------------
+  def __len__(self):
+    return len(self.plugins)
+
+  #----------------------------------------------------------------------------
+  def __iter__(self):
+    return iter(self.plugins)
+
+#------------------------------------------------------------------------------
 def plugins(group, spec=None):
   # TODO: share this documentation with `../doc/plugin.rst`...
   '''
-  Returns a list of plugins for the specified setuptools-style
+  Returns a `PluginSet` object for the specified setuptools-style
   entrypoint `group`. This is just a wrapper around
   `pkg_resources.iter_entry_points` that allows the plugins to sort
-  and override themselves. The plugins have the following attributes
-  of note:
-
-  * `name` : the name of the plugin type
-
-  * `handle` : the actual plugin symbol
-
-  * `entrypoint` : for registered plugins, the setuptools EntryPoint
-    object, otherwise ``None``
+  and override themselves.
 
   The optional `spec` parameter controls how and what plugins are
   loaded. If it is ``None`` or the special value ``'*'``, then the
@@ -109,10 +164,10 @@ def plugins(group, spec=None):
 
   * ``'pkg.foo.bar'`` : load only the "pkg.foo.bar" Python symbol.
   '''
-  spec   = _parse_spec(spec)
-  plugs  = list(_get_registered_plugins(group, spec))
-  plugs  += list(_get_unregistered_plugins(group, plugs, spec))
-  return _sort_plugins(group, plugs, spec)
+  pspec  = _parse_spec(spec)
+  plugs  = list(_get_registered_plugins(group, pspec))
+  plugs  += list(_get_unregistered_plugins(group, plugs, pspec))
+  return PluginSet(group, spec, list(_sort_plugins(group, plugs, pspec)))
 
 #------------------------------------------------------------------------------
 # relative specs:
