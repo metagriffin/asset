@@ -260,12 +260,14 @@ def _sort_plugins(group, plugins, spec=None):
         plugs = plugs[len(plugs) - idx - 1:]
     lut[name] = plugs
   # apply `spec`
-  names = [name for name in sorted(lut.keys()) if _match_spec(spec, name)]
+  names = sorted(set(
+    [name for name in lut.keys() if _match_spec(spec, name)]))
   if spec and spec[0][0] not in _spec_rel:
     snames = []
     for item in spec:
       if item[1] in names:
-        snames.append(item[1])
+        if item[1] not in snames:
+          snames.append(item[1])
         continue
       if item[0] == SPEC_OPT:
         continue
