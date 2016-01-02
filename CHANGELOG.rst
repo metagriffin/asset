@@ -3,6 +3,14 @@ ChangeLog
 =========
 
 
+v0.6.*
+======
+
+* Enhanced return value from `asset.plugins` to be a first-class
+  object (`PluginSet`) that has aggregate plugin operation methods
+  `PluginSet.handle` and `PluginSet.filter`.
+
+
 v0.6.7
 ======
 
