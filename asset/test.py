@@ -401,5 +401,53 @@ class TestPlugins(unittest.TestCase):
     self.assertEqual(my_bar_plugin.final, True)
 
 #------------------------------------------------------------------------------
+class TestPluginSet(unittest.TestCase):
+
+  maxDiff = None
+
+  @staticmethod
+  def increment(value, counter=None, **kw):
+    if counter:
+      counter()
+    if 'abort' in kw and value == kw['abort']:
+      return None
+    if value is None:
+      return None
+    return value + 1
+
+  #----------------------------------------------------------------------------
+  def test_filter_empty(self):
+    self.assertEqual(
+      'foo',
+      asset.PluginSet('group', None, []).filter('foo'))
+
+  #----------------------------------------------------------------------------
+  def test_handle_empty(self):
+    with self.assertRaises(ValueError) as cm:
+      asset.PluginSet('group', None, []).handle('foo')
+    self.assertEqual(
+      str(cm.exception), "No plugins available in group 'group'")
+
+  #----------------------------------------------------------------------------
+  def test_filter_aborts(self):
+    count = dict(value=0)
+    def counter():
+      count['value'] = count['value'] + 1
+    pset = asset.plugins(
+      'test-group', ','.join(['asset.test.TestPluginSet.increment'] * 5))
+    self.assertEqual(pset.filter(0, abort=2, counter=counter), None)
+    self.assertEqual(count['value'], 3)
+
+  #----------------------------------------------------------------------------
+  def test_handle_perseveres(self):
+    count = dict(value=0)
+    def counter():
+      count['value'] = count['value'] + 1
+    pset = asset.plugins(
+      'test-group', ','.join(['asset.test.TestPluginSet.increment'] * 5))
+    self.assertEqual(pset.handle(0, abort=2, counter=counter), None)
+    self.assertEqual(count['value'], 5)
+
+#------------------------------------------------------------------------------
 # end of $Id$
 #------------------------------------------------------------------------------
