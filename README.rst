@@ -87,12 +87,18 @@ Find out what package is calling the current function:
     asset.caller(ignore=['bar', 'zig'])
     # ==> None
 
-Call all the plugins for a given extension group:
+Call all the plugins for a given group:
 
 .. code-block:: python
 
-  for plugin in asset.plugins('mypackage.extensions'):
+  for plugin in asset.plugins('mypackage.plugins'):
     plugin.handle()
+
+Filter an object through all the plugins for a given group:
+
+.. code-block:: python
+
+  result = asset.plugins('mypackage.plugins').filter(thing)
 
 
 Testing
