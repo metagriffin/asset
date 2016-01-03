@@ -83,6 +83,15 @@ class PluginSet(object):
     return object
 
   #----------------------------------------------------------------------------
+  def select(self, name):
+    '''
+    Returns a new PluginSet that has only the plugins in this that are
+    named `name`.
+    '''
+    return PluginSet(self.group, name, [
+      plug for plug in self.plugins if plug.name == name])
+
+  #----------------------------------------------------------------------------
   def __bool__(self):
     return bool(self.plugins)
 
@@ -93,6 +102,11 @@ class PluginSet(object):
   #----------------------------------------------------------------------------
   def __iter__(self):
     return iter(self.plugins)
+
+  #----------------------------------------------------------------------------
+  def __repr__(self):
+    return '<PluginSet group=%r plugins=%r>' % (
+      self.group, [plug.name for plug in self.plugins])
 
 #------------------------------------------------------------------------------
 def plugins(group, spec=None):
@@ -167,7 +181,7 @@ def plugins(group, spec=None):
   pspec  = _parse_spec(spec)
   plugs  = list(_get_registered_plugins(group, pspec))
   plugs  += list(_get_unregistered_plugins(group, plugs, pspec))
-  return PluginSet(group, spec, list(_sort_plugins(group, plugs, pspec)))
+  return PluginSet(group, spec, list(_sort_plugins(group, plugs, pspec, spec)))
 
 #------------------------------------------------------------------------------
 # relative specs:
@@ -208,19 +222,19 @@ def _parse_spec(spec):
   for item in wspec:
     if not item.strip():
       continue
-    item = (SPEC_SET, item)
-    if item[1] and item[1][0] in (SPEC_ADD, SPEC_REM, SPEC_OPT):
-      item = (item[1][0], item[1][1:].strip())
-    if item[1] and item[1][0] in (SPEC_RE,):
+    item = aadict(op=SPEC_SET, target=item)
+    if item.target and item.target[0] in (SPEC_ADD, SPEC_REM, SPEC_OPT):
+      item = aadict(op=item.target[0], target=item.target[1:].strip())
+    if item.target and item.target[0] in (SPEC_RE,):
       raise ValueError(
         'regex plugin loading expression must start and end with "/"')
-    if not _specname_cre.match(item[1]):
+    if not _specname_cre.match(item.target):
       raise ValueError(
-        'invalid plugin name in specification expression: %r' % (item[1],))
+        'invalid plugin name in specification expression: %r' % (item.target,))
     ret.append(item)
   if respec:
-    ret.append((SPEC_RE, re.compile(respec)))
-  ops = set([item[0] for item in ret])
+    ret.append(aadict(op=SPEC_RE, target=re.compile(respec)))
+  ops = set([item.op for item in ret])
   rel = ops & _spec_rel
   abs = ops & _spec_abs
   if bool(ops & rel) and bool(ops & abs):
@@ -234,28 +248,29 @@ def _match_spec(spec, name):
   if not spec:
     return True
   for idx, item in enumerate(spec):
-    if item[0] == SPEC_RE:
-      if item[1].match(name):
+    if item.op == SPEC_RE:
+      if item.target.match(name):
         return True
       if ( idx + 1 ) >= len(spec):
         return False
       continue
-    if item[1] != name:
+    if item.target != name:
       continue
-    if item[0] == SPEC_REM:
+    if item.op == SPEC_REM:
       return False
     return True
-  if spec[0][0] in _spec_rel:
+  if spec[0].op in _spec_rel:
     return True
   return False
 
 #------------------------------------------------------------------------------
 def _decorate_plugin(plugin):
-  plugin.after   = getattr(plugin.handle, 'after',   None)
-  plugin.before  = getattr(plugin.handle, 'before',  None)
-  plugin.order   = getattr(plugin.handle, 'order',   0)
-  plugin.replace = getattr(plugin.handle, 'replace', False)
-  plugin.final   = getattr(plugin.handle, 'final',   False)
+  plugin.after   = getattr(plugin.handle, 'after',        None)
+  plugin.before  = getattr(plugin.handle, 'before',       None)
+  plugin.order   = getattr(plugin.handle, 'order',        0)
+  plugin.replace = getattr(plugin.handle, 'replace',      False)
+  plugin.final   = getattr(plugin.handle, 'final',        False)
+  plugin.name    = getattr(plugin.handle, 'plugin_name',  plugin.name)
 
 #------------------------------------------------------------------------------
 def _get_registered_plugins(group, spec=None):
@@ -273,11 +288,21 @@ def _get_registered_plugins(group, spec=None):
 #------------------------------------------------------------------------------
 def _load_asset_plugin(spec):
   plugin = aadict(
-    name         = spec,
+    name         = spec.target,
     entrypoint   = None,
-    handle       = symbol(spec),
+    handle       = symbol(spec.target),
   )
   _decorate_plugin(plugin)
+  if plugin.name != spec.target:
+    # todo: this is a hack so that plugins can be loaded by their
+    #       dotted path, BUT they can declare themselves with a different
+    #       name. the effect here is that `_load_asset_plugin` has the side
+    #       effect of updating the spec to the declared name...
+    #       this is only needed in *very* odd circumstances...
+    #       the "right" way to do this is for the `spec` to only be applied
+    #       once, during load, so that if it specifies the load of a
+    #       dotted path, it will never be re-tested... ugh.
+    spec.target = plugin.name
   return plugin
 
 #------------------------------------------------------------------------------
@@ -285,18 +310,18 @@ def _get_unregistered_plugins(group, plugins, spec=None):
   spec = _parse_spec(spec)
   names = [plug.name for plug in plugins]
   for item in spec:
-    if item[0] in (SPEC_REM, SPEC_RE) or item[1] in names:
+    if item.op in (SPEC_REM, SPEC_RE) or item.target in names:
       continue
     try:
-      yield _load_asset_plugin(item[1])
+      yield _load_asset_plugin(item)
     except Exception:
-      if item[0] in (SPEC_OPT,):
-        log.debug('could not load optional plugin %r', item[1])
+      if item.op in (SPEC_OPT,):
+        log.debug('could not load optional plugin %r', item.target)
         continue
-      raise ValueError('could not load plugin %r' % (item[1],))
+      raise ValueError('could not load plugin %r' % (item.target,))
 
 #------------------------------------------------------------------------------
-def _sort_plugins(group, plugins, spec=None):
+def _sort_plugins(group, plugins, spec=None, ospec=None):
   spec = _parse_spec(spec)
   lut = dict()
   for plugin in plugins:
@@ -317,18 +342,18 @@ def _sort_plugins(group, plugins, spec=None):
   # apply `spec`
   names = sorted(set(
     [name for name in lut.keys() if _match_spec(spec, name)]))
-  if spec and spec[0][0] not in _spec_rel:
+  if spec and spec[0].op not in _spec_rel:
     snames = []
     for item in spec:
-      if item[1] in names:
-        if item[1] not in snames:
-          snames.append(item[1])
+      if item.target in names:
+        if item.target not in snames:
+          snames.append(item.target)
         continue
-      if item[0] == SPEC_OPT:
+      if item.op == SPEC_OPT:
         continue
       raise TypeError(
         '%s plugin spec %r specified unavailable dependency %r'
-        % (group, spec, item[1]))
+        % (group, ospec or spec, item.target))
     for name in snames:
       for plug in lut[name]:
         yield plug
