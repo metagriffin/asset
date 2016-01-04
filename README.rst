@@ -94,11 +94,19 @@ Call all the plugins for a given group:
   for plugin in asset.plugins('mypackage.plugins'):
     plugin.handle()
 
-Filter an object through all the plugins for a given group:
+Filter an object through all the plugins for a given group (if there
+are no plugins, this will simply return `thing`):
 
 .. code-block:: python
 
   result = asset.plugins('mypackage.plugins').filter(thing)
+
+Load all registered plugins, select the ones named `foo` and invoke
+them (this will fail if there is no `foo` plugin):
+
+.. code-block:: python
+
+  result = asset.plugins('mypackage.plugins').select('foo').handle(thing)
 
 
 Testing
