@@ -3,7 +3,13 @@ ChangeLog
 =========
 
 
-v0.6.*
+v0.6.9
+======
+
+* Added `PluginSet.select(name)` plugin selection method.
+
+
+v0.6.8
 ======
 
 * Enhanced return value from `asset.plugins` to be a first-class
