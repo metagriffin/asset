@@ -281,7 +281,13 @@ def _get_registered_plugins(group, spec=None):
       entrypoint   = entrypoint,
     )
     if _match_spec(spec, plugin.name):
-      plugin.handle  = entrypoint.load()
+      try:
+        plugin.handle  = entrypoint.load()
+      except ImportError as err:
+        log.exception(
+          'Could not load plugin "%s" in group "%s": %s',
+          entrypoint.name, group, str(err))
+        raise
       _decorate_plugin(plugin)
       yield plugin
 
