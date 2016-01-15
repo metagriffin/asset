@@ -36,7 +36,7 @@ def symbol(spec):
     return spec
   if ':' in spec:
     spec, attr = spec.split(':', 1)
-    return getattr(resolve(spec), attr)
+    return getattr(symbol(spec), attr)
   spec = spec.split('.')
   used = spec.pop(0)
   found = __import__(used)
