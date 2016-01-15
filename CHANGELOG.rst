@@ -3,6 +3,13 @@ ChangeLog
 =========
 
 
+v0.6.10
+=======
+
+* Added plugin loading error logging
+* Fixed symbol loading bug when using ':' separator
+
+
 v0.6.9
 ======
 
