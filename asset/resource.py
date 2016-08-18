@@ -89,6 +89,14 @@ class AssetGroup(object):
   def peek(self):
     for pkg, res in self.resources():
       return self
+  def count(self):
+    return len(self)
+  def exists(self):
+    try:
+      self.peek()
+      return True
+    except NoSuchAsset:
+      return False
   def resources(self):
     count = 0
     for resource in listres(self.package, self.pkgdir):
@@ -161,6 +169,14 @@ class Asset(object):
     if pkg_resources.resource_exists(self.package, self.name):
       return self
     raise NoSuchAsset('No asset matched "%s:%s"' % (self.package, self.name))
+  def count(self):
+    return len(self)
+  def exists(self):
+    try:
+      self.peek()
+      return True
+    except NoSuchAsset:
+      return False
   def resources(self):
     self.peek()
     yield (self.package, self.name)

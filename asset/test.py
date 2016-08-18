@@ -45,6 +45,19 @@ class TestAsset(unittest.TestCase, pxml.XmlTestMixin):
     self.assertRegexpMatches(asset.version('pxml'), r'^\d+.\d+.\d+$')
 
   #----------------------------------------------------------------------------
+  def test_count(self):
+    self.assertEqual(asset.load('asset:test/data/file1.nl').count(), 1)
+    self.assertEqual(len(asset.load('asset:test/data/file1.nl')), 1)
+    self.assertEqual(asset.load('asset:test/data/**.nl').count(), 3)
+    self.assertEqual(len(asset.load('asset:test/data/**.nl')), 3)
+
+  #----------------------------------------------------------------------------
+  def test_exists(self):
+    self.assertEqual(asset.load('asset:test/data/file1.nl').exists(), True)
+    self.assertEqual(asset.load('asset:test/data/**.nl').exists(), True)
+    self.assertEqual(asset.load('asset:no-such-file.ext').exists(), False)
+
+  #----------------------------------------------------------------------------
   def test_load_multi(self):
     self.assertEqual(len(asset.load('asset:test/data/file1.nl')), 1)
     self.assertEqual(
