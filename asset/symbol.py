@@ -67,10 +67,12 @@ def caller(ignore=None):
       mod = inspect.getmodule(record[0])
       if not mod:
         continue
-      mod = getattr(mod, '__package__', None)
-      if mod == 'asset':
+      mod = getattr(mod, '__package__', None) or getattr(mod, '__name__', None)
+      if mod == 'asset' or mod.startswith('asset.'):
         continue
       if not one:
+        # we've finally hit the module that actually called `caller`:
+        # ignore it, since we need to return the caller's caller.
         one = True
         continue
       if mod not in ignore:
