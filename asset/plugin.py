@@ -62,7 +62,7 @@ class PluginSet(object):
       if not self.spec or self.spec == SPEC_ALL:
         raise ValueError('No plugins available in group %r' % (self.group,))
       raise ValueError(
-        'No plugins matched in group %r matched %r' % (self.group, self.spec))
+        'No plugins in group %r matched %r' % (self.group, self.spec))
     for plugin in self.plugins:
       object = plugin.handle(object, *args, **kw)
     return object
