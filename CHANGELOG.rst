@@ -3,6 +3,14 @@ ChangeLog
 =========
 
 
+v0.6.11
+=======
+
+* Added `Asset.count()` helper function (alias to ``len(Asset)``)
+* Added `Asset.exists()` helper function (non-exception-based version of
+  ``Asset.peek()``)
+
+
 v0.6.10
 =======
 
