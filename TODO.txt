@@ -1,3 +1,5 @@
+* add a context manager for ``with asset.load(...) as fp: ...``
+
 * when you load relative plugins, they should default to the end
   unless explicit ordering is defined by the plugin. eg, given a
   standard plugin set of ('a', 'b') where 'b' specifies ``after='a'``,
