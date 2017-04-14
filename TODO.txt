@@ -1,3 +1,13 @@
+* make it easy to create a plugin helper, eg instead of:
+
+    @asset.plugin('jstc.precompilers.plugins', 'text/x-easytpl')
+    ...def-my-plugin...
+
+  make it possible to do:
+
+    @jstc.precompilers.plugin('text/x-easytpl')
+    ...def-my-plugin...
+
 * add a context manager for ``with asset.load(...) as fp: ...``
 
 * when you load relative plugins, they should default to the end
