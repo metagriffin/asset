@@ -38,15 +38,15 @@ test_dependencies = [
   # note: `pxml` should be installed as an egg, i.e.:
   #         easy_install --zip-ok pxml
   #       for the unit tests to be able to test that.
-  'pxml                 >= 0.2.11',
+  'pxml                 >= 0.2.13',
 ]
 
 dependencies = [
   # note: `globre` should be installed unzipped, i.e.:
   #         easy_install --always-unzip globre
   #       for the unit tests to be able to test that.
-  'globre               >= 0.0.5',
-  'six                  >= 1.4.1',
+  'globre               >= 0.1.5',
+  'six                  >= 1.10.0',
   'aadict               >= 0.2.2',
 ]
 
