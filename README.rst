@@ -12,14 +12,14 @@ TL;DR
 
 Install:
 
-.. code-block:: bash
+.. code:: bash
 
   $ pip install asset
 
 Load symbols (e.g. functions, classes, or variables) from a package by
 name:
 
-.. code-block:: python
+.. code:: python
 
   import asset
 
@@ -28,7 +28,7 @@ name:
 
 Load data files from a package:
 
-.. code-block:: python
+.. code:: python
 
   # load the file 'mypackage/templates/data.txt' into string
   data = asset.load('mypackage:templates/data.txt').read()
@@ -40,7 +40,7 @@ Load data files from a package:
 Multiple files can be operated on at once by using `globre
 <https://pypi.python.org/pypi/globre>`_ style wildcards:
 
-.. code-block:: python
+.. code:: python
 
   # concatenate all 'css' files into one string:
   css = asset.load('mypackage:static/style/**.css').read()
@@ -56,7 +56,7 @@ Multiple files can be operated on at once by using `globre
 
 Query the installed version of a package:
 
-.. code-block:: python
+.. code:: python
 
   asset.version('asset')
   # ==> '0.0.5'
@@ -69,7 +69,7 @@ Query the installed version of a package:
 
 Find out what package is calling the current function:
 
-.. code-block:: python
+.. code:: python
 
   # assuming the call stack is:
   #   in package "zig" a function "x", which calls
@@ -89,7 +89,7 @@ Find out what package is calling the current function:
 
 Call all the plugins for a given group:
 
-.. code-block:: python
+.. code:: python
 
   for plugin in asset.plugins('mypackage.plugins'):
     plugin.handle()
@@ -97,16 +97,31 @@ Call all the plugins for a given group:
 Filter an object through all the plugins for a given group (if there
 are no plugins, this will simply return `thing`):
 
-.. code-block:: python
+.. code:: python
 
   result = asset.plugins('mypackage.plugins').filter(thing)
 
 Load all registered plugins, select the ones named `foo` and invoke
 them (this will fail if there is no `foo` plugin):
 
-.. code-block:: python
+.. code:: python
 
   result = asset.plugins('mypackage.plugins').select('foo').handle(thing)
+
+Chunk a file (or any file-like object) into 1 KiB chunks:
+
+.. code:: python
+
+  with open('/var/binary/data', 'rb') as fp:
+    for chunk in asset.chunks(fp, 1024):
+      # ... do something with `chunk` ...
+
+Chunk an Asset stream (here using the `.chunks` alias method):
+
+.. code:: python
+
+  for chunk in asset.load('mypackage:data/**.bin').chunks():
+    # ... using the default chunk size (usually 8 KiB) ...
 
 
 Testing
@@ -150,7 +165,7 @@ Note: because ``asset.load()`` does lazy-loading, it only throws a
 AssetGroup! If you need an immediate error, use the `peek()` method.
 Note that it returns itself, so you can do something like:
 
-.. code-block:: python
+.. code:: python
 
   import asset
 
