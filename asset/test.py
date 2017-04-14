@@ -188,7 +188,46 @@ line-2</node>
     with self.assertRaises(StopIteration):
       six.next(reader)
 
+  #----------------------------------------------------------------------------
+  def test_chunks_bytes(self):
+    src = six.BytesIO('foo-1\nbar\nzig')
+    self.assertEqual(
+      list(asset.chunks(src, 3)),
+      ['foo', '-1\n', 'bar', '\nzi', 'g'])
+    self.assertEqual(
+      list(asset.chunks(asset.load('asset:test/data/file1.nl').stream(), 3)),
+      ['lin', 'e-1', '\nli', 'ne-', '2'])
+    self.assertEqual(
+      list(asset.chunks(asset.load('asset:test/data/file**').stream(), 3)),
+      ['lin', 'e-1', '\nli', 'ne-', '2li', 'ne-', '3\n'])
+    self.assertEqual(
+      list(asset.load('asset:test/data/file1.nl').chunks(3)),
+      ['lin', 'e-1', '\nli', 'ne-', '2'])
+    self.assertEqual(
+      list(asset.load('asset:test/data/file**').chunks(3)),
+      ['lin', 'e-1', '\nli', 'ne-', '2li', 'ne-', '3\n'])
+
+  #----------------------------------------------------------------------------
+  def test_chunks_lines(self):
+    src = six.BytesIO('foo-1\nbar\nzig')
+    self.assertEqual(
+      list(asset.chunks(src, 'lines')),
+      ['foo-1\n', 'bar\n', 'zig'])
+    self.assertEqual(
+      list(asset.chunks(asset.load('asset:test/data/file1.nl').stream(), 'lines')),
+      ['line-1\n', 'line-2'])
+    self.assertEqual(
+      list(asset.chunks(asset.load('asset:test/data/file**').stream(), 'lines')),
+      ['line-1\n', 'line-2', 'line-3\n'])
+    self.assertEqual(
+      list(asset.load('asset:test/data/file1.nl').chunks('lines')),
+      ['line-1\n', 'line-2'])
+    self.assertEqual(
+      list(asset.load('asset:test/data/file**').chunks('lines')),
+      ['line-1\n', 'line-2', 'line-3\n'])
+
 
 #------------------------------------------------------------------------------
 # end of $Id$
+# $ChangeLog$
 #------------------------------------------------------------------------------
