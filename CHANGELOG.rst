@@ -3,6 +3,13 @@ ChangeLog
 =========
 
 
+v0.6.12
+=======
+
+* Added `chunks()` helper function and Asset methods for binary- or
+  line-oriented stream chunking
+
+
 v0.6.11
 =======
 
