@@ -4,8 +4,8 @@ Generalized Package Asset Loader
 
 Loads resources and symbols from a python package, whether installed
 as a directory, an egg, or in source form. Also provides some other
-package-related helper methods, including ``asset.version()`` and
-``asset.caller()``.
+package-related helper methods, including ``asset.version()``,
+``asset.caller()``, and ``asset.chunks()``.
 
 TL;DR
 =====
