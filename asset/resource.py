@@ -21,15 +21,21 @@
 
 import re
 import os
-import pkg_resources
 import functools
+
+import pkg_resources
 import six
 import globre
 
 from .symbol import symbol
 
 #------------------------------------------------------------------------------
+
+MAXBUF = 8192
+
+#------------------------------------------------------------------------------
 class NoSuchAsset(Exception): pass
+
 
 #------------------------------------------------------------------------------
 class AssetGroupStream(object):
@@ -67,6 +73,8 @@ class AssetGroupStream(object):
       except StopIteration:
         self._cur = None
         return b''
+  def chunks(self, *args, **kws):
+    return chunks(self, *args, **kws)
   def close(self):
     pass
   def __iter__(self):
@@ -75,6 +83,7 @@ class AssetGroupStream(object):
       if not line:
         return
       yield line
+
 
 #------------------------------------------------------------------------------
 class AssetGroup(object):
@@ -106,6 +115,8 @@ class AssetGroup(object):
       yield (self.package, resource)
     if count <= 0:
       raise NoSuchAsset('No asset matched "%s"' % (self.spec,))
+  def chunks(self, *args, **kws):
+    return self._stream().chunks(*args, **kws)
   def __len__(self):
     return len(list(self.resources()))
   def __iter__(self):
@@ -122,6 +133,7 @@ class AssetGroup(object):
   def readline(self):
     return self._stream().readline()
 
+
 #------------------------------------------------------------------------------
 class AssetStream(object):
   # TODO: implement all expected file-like methods...
@@ -134,12 +146,15 @@ class AssetStream(object):
     return self.stream.readline()
   def close(self):
     pass
+  def chunks(self, *args, **kws):
+    return chunks(self.stream, *args, **kws)
   def __iter__(self):
     while True:
       line = self.readline()
       if not line:
         return
       yield line
+
 
 #------------------------------------------------------------------------------
 class Asset(object):
@@ -180,6 +195,8 @@ class Asset(object):
   def resources(self):
     self.peek()
     yield (self.package, self.name)
+  def chunks(self, *args, **kws):
+    return self._stream().chunks(*args, **kws)
   def __len__(self):
     self.peek()
     return 1
@@ -194,6 +211,7 @@ class Asset(object):
     if isinstance(prov, pkg_resources.ZipProvider):
       return None
     return pkg_resources.resource_filename(self.package, self.name)
+
 
 defaultExclude = ('.rcs', '.svn', '.git', '.hg')
 
@@ -258,5 +276,39 @@ def load(pattern, *args, **kw):
   return Asset(group, pkgname, pkgpat)
 
 #------------------------------------------------------------------------------
+def chunks(stream, size=None):
+  '''
+  Returns a generator of chunks from the `stream` with a maximum
+  size of `size`. I don't know why this isn't part of core Python.
+
+  :Parameters:
+
+  stream : file-like object
+
+    The stream to fetch the chunks from. Note that the stream will
+    not be repositioned in any way.
+
+  size : int | 'lines'; default: null
+
+    If a integer, the size of the chunks to return. If the
+    string ``"lines"``, then behaves the same as `file.read()`.
+    If unspecified or null, defaults to the package default
+    MAXBUF size (usually 8 KiB).
+  '''
+  if size == 'lines':
+    for item in stream:
+    # for item in stream.readline():
+      yield item
+    return
+  if size is None:
+    size = MAXBUF
+  while True:
+    buf = stream.read(size)
+    if not buf:
+      return
+    yield buf
+
+#------------------------------------------------------------------------------
 # end of $Id$
+# $ChangeLog$
 #------------------------------------------------------------------------------
