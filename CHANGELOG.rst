@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.6.13
+=======
+
+* Added `exists()` top-level module helper function
+
+
 v0.6.12
 =======
 
