@@ -279,6 +279,21 @@ def load(pattern, *args, **kws):
   return Asset(group, pkgname, pkgpat)
 
 #------------------------------------------------------------------------------
+def exists(pattern, *args, **kws):
+  '''
+  Helper method to check to see if a `load` will be successful,
+  effectively identical to::
+
+    from asset import load, NoSuchAsset
+    try:
+      load(pattern).peek()
+      return True
+    except NoSuchAsset:
+      return False
+  '''
+  return load(pattern, *args, **kws).exists()
+
+#------------------------------------------------------------------------------
 def chunks(stream, size=None):
   '''
   Returns a generator of chunks from the `stream` with a maximum
