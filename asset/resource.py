@@ -241,7 +241,7 @@ def listres(pkgname, pkgdir,
       yield subcur
 
 #------------------------------------------------------------------------------
-def load(pattern, *args, **kw):
+def load(pattern, *args, **kws):
   '''
   Given a package asset-spec glob-pattern `pattern`, returns an
   :class:`AssetGroup` object, which in turn can act as a generator of
@@ -256,7 +256,10 @@ def load(pattern, *args, **kw):
     # concatenate all 'css' files into one string:
     css = asset.load('mypackage:static/style/**.css').read()
 
+  NOTE: currently, any extra parameters and keywords beyond `pattern`
+  are ignored.
   '''
+  # todo: why are `args` and `kws` being ignored?...
 
   spec = pattern
 
